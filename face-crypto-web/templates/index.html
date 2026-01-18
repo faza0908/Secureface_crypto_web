@@ -1,0 +1,820 @@
+html
+<!doctype html>
+<html lang="id">
+<head>
+  <!-- Metadata dasar dokumen -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <!-- Judul halaman (muncul di tab browser) -->
+  <title>Face Crypto Dashboard</title>
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.12);
+      --text:#E9EEFF;
+      --muted: rgba(233,238,255,.7);
+      --danger: rgba(255, 94, 94, .18);
+      --dangerBorder: rgba(255, 94, 94, .45);
+      --ok: rgba(102, 255, 163, .16);
+      --okBorder: rgba(102, 255, 163, .38);
+      --accent1:#7C4DFF;
+      --accent2:#00D4FF;
+      --accent3:#FF4D9D;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius: 18px;
+      --radius2: 14px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", "Noto Sans", "Liberation Sans", sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,77,255,.20), transparent 60%),
+                  radial-gradient(900px 500px at 90% 20%, rgba(0,212,255,.18), transparent 55%),
+                  radial-gradient(900px 700px at 50% 100%, rgba(255,77,157,.12), transparent 55%),
+                  linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    /* Animated aurora */
+    .aurora{
+      position: fixed;
+      inset:-40vh -40vw;
+      pointer-events:none;
+      filter: blur(60px);
+      opacity:.65;
+      z-index:0;
+      background:
+        conic-gradient(from 200deg,
+          rgba(124,77,255,.40),
+          rgba(0,212,255,.25),
+          rgba(255,77,157,.25),
+          rgba(124,77,255,.40));
+      animation: spin 18s linear infinite;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .wrap{
+      position: relative;
+      z-index:1;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 18px 44px;
+    }
+
+    /* Topbar */
+    .topbar{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .logo{
+      width:38px; height:38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(124,77,255,.9), rgba(0,212,255,.9));
+      box-shadow: 0 14px 30px rgba(0,212,255,.15);
+      display:grid; place-items:center;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .brand h1{
+      font-size: 16px;
+      margin:0;
+      line-height:1.2;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin:2px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+    .note{
+      color: var(--muted);
+      font-size: 12.5px;
+      max-width: 560px;
+      text-align:right;
+    }
+
+    /* Grid */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .note{ text-align:left; max-width: unset; }
+      .topbar{ align-items:flex-start; flex-direction:column; }
+    }
+
+    /* Cards */
+    .card{
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .card-h h2{
+      margin:0;
+      font-size: 14px;
+      letter-spacing:.3px;
+    }
+    .card-b{ padding: 16px; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+    }
+    .dot{
+      width:8px; height:8px; border-radius:50%;
+      background: rgba(0,212,255,.9);
+      box-shadow: 0 0 0 4px rgba(0,212,255,.15);
+    }
+
+    .errorbox{
+      padding: 12px 14px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--dangerBorder);
+      background: var(--danger);
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap:10px;
+      padding: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      width: fit-content;
+    }
+    .tab{
+      appearance:none;
+      border:0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: 12.5px;
+      letter-spacing:.2px;
+      transition: .18s ease;
+    }
+    .tab[aria-selected="true"]{
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(124,77,255,.35), rgba(0,212,255,.25));
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    /* Form */
+    label{ display:block; margin: 12px 0 6px; color: var(--muted); font-size:12.5px; }
+    input[type="file"], input[type="password"]{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+    }
+    input[type="password"]::placeholder{ color: rgba(233,238,255,.45); }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 700;
+      letter-spacing:.2px;
+      transition: .16s ease;
+      text-decoration:none;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.26); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,77,255,.85), rgba(0,212,255,.70));
+      border-color: rgba(255,255,255,.2);
+      box-shadow: 0 14px 36px rgba(124,77,255,.22);
+    }
+    .btn.ghost{
+      background: transparent;
+      border-color: rgba(255,255,255,.14);
+      color: var(--muted);
+    }
+
+    .muted{ color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+
+    /* Dropzone */
+    .dropzone{
+      border: 1px dashed rgba(255,255,255,.22);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 14px;
+      transition: .16s ease;
+    }
+    .dropzone.dragover{
+      border-color: rgba(0,212,255,.55);
+      box-shadow: 0 0 0 4px rgba(0,212,255,.12);
+    }
+    .filemeta{
+      margin-top: 10px;
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+    }
+    .meta{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Results */
+    .result-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px){
+      .result-grid{ grid-template-columns: 1fr; }
+    }
+
+    .imgbox{
+      border-radius: var(--radius);
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+    .imgbox .cap{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.03);
+    }
+    .imgbox .cap h3{
+      margin:0;
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .badge{
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      background: rgba(255,255,255,.04);
+      white-space:nowrap;
+    }
+    .imgbox .body{
+      padding: 10px;
+    }
+    .imgbox img{
+      width:100%;
+      display:block;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    /* Encrypted download card */
+    .download-card{
+      display:flex;
+      gap: 12px;
+      align-items:flex-start;
+      padding: 14px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      margin-top: 14px;
+    }
+    .chip{
+      width:44px; height:44px;
+      border-radius: 14px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, rgba(255,77,157,.35), rgba(124,77,255,.35));
+      border: 1px solid rgba(255,255,255,.12);
+      flex: 0 0 auto;
+    }
+    .download-card .txt{ flex:1; min-width: 0; }
+    .download-card .txt b{ display:block; margin-bottom: 4px; }
+    .download-card .txt small{ color: var(--muted); }
+
+    /* Loading overlay */
+    .overlay{
+      position: fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+    }
+    .overlay.on{ display:flex; }
+    .loader{
+      width: min(460px, 90vw);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+    .loader .bar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      overflow:hidden;
+      margin-top: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .loader .bar > i{
+      display:block;
+      height:100%;
+      width: 38%;
+      background: linear-gradient(90deg, rgba(124,77,255,.85), rgba(0,212,255,.75), rgba(255,77,157,.70));
+      border-radius: 999px;
+      animation: move 1.1s ease-in-out infinite;
+    }
+    @keyframes move{
+      0%{ transform: translateX(-30%); }
+      50%{ transform: translateX(110%); }
+      100%{ transform: translateX(-30%); }
+    }
+
+    .fade-in{
+      animation: fade .35s ease both;
+    }
+    @keyframes fade{
+      from{ opacity:0; transform: translateY(6px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Small icons */
+    .ico{ width:18px; height:18px; display:inline-block; }
+    .ico svg{ width:18px; height:18px; display:block; }
+  </style>
+</head>
+
+<body>
+  <!-- Layer visual aurora (dekorasi background) -->
+  <div class="aurora"></div>
+
+  <!-- Loading overlay (muncul saat submit form, untuk indikasi proses berjalan) -->
+  <div class="overlay" id="overlay">
+    <div class="loader">
+      <!-- Header overlay: status proses -->
+      <div style="display:flex; gap:10px; align-items:center; justify-content:space-between;">
+        <div>
+          <b>Memproses…</b>
+          <div class="muted">Deteksi wajah, edge, blur, dan enkripsi sedang berjalan.</div>
+        </div>
+        <!-- Indikator status "Running" -->
+        <span class="pill"><span class="dot"></span> Running</span>
+      </div>
+
+      <!-- Bar animasi loading -->
+      <div class="bar"><i></i></div>
+
+      <!-- Catatan agar user tidak menutup tab -->
+      <div class="muted" style="margin-top:10px;">Jangan tutup tab ini sampai selesai.</div>
+    </div>
+  </div>
+
+  <!-- Wrapper konten utama (agar tidak mentok layar, center layout) -->
+  <div class="wrap">
+
+    <!-- Topbar: judul aplikasi + catatan singkat -->
+    <div class="topbar fade-in">
+      <!-- Branding: logo + judul -->
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <!-- Ikon logo (SVG) -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l7.5 4.3v11.4L12 22 4.5 17.7V6.3L12 2z" stroke="rgba(255,255,255,.9)" stroke-width="1.6"/>
+            <path d="M12 7v10" stroke="rgba(255,255,255,.9)" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M8.5 10.5h7" stroke="rgba(255,255,255,.9)" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <!-- Nama dashboard -->
+          <h1>Face Crypto Dashboard</h1>
+          <!-- Deskripsi fitur utama -->
+          <p>Edge • Blur Wajah • AES-GCM Encrypt/Decrypt</p>
+        </div>
+      </div>
+
+      <!-- Catatan: blur tidak reversible, yang reversible hanya file .enc -->
+      <div class="note">
+        Blur tidak reversible. Yang bisa didekripsi hanya file terenkripsi <b>.enc</b> dari foto asli.
+      </div>
+    </div>
+
+    <!-- Grid utama: kiri (control), kanan (output) -->
+    <div class="grid">
+      <!-- LEFT: panel kontrol (upload, encrypt/decrypt, status) -->
+      <div class="card fade-in">
+        <div class="card-h">
+          <h2>Control Center</h2>
+
+          <!-- Pill status: menampilkan face count jika tersedia dari backend -->
+          <div class="pill">
+            <span class="dot"></span>
+            {% if face_count is defined %}
+              <!-- face_count biasanya diisi dari hasil deteksi wajah -->
+              Face detected: <b style="color:var(--text)">{{ face_count }}</b>
+            {% else %}
+              <!-- Kondisi awal sebelum ada proses -->
+              Ready
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="card-b">
+          <!-- Area pesan error dari backend (misal file invalid, decrypt gagal, dll) -->
+          {% if error %}
+            <div class="errorbox">{{ error }}</div>
+          {% endif %}
+
+          <!-- Tabs: memilih mode Encrypt / Decrypt (UI saja, bukan route) -->
+          <div class="tabs" role="tablist" aria-label="Mode">
+            <button class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-encrypt" id="tab-encrypt">Encrypt</button>
+            <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-decrypt" id="tab-decrypt">Decrypt</button>
+          </div>
+
+          <!-- ENCRYPT PANEL: upload foto + password, submit ke /process -->
+          <section id="panel-encrypt" role="tabpanel" aria-labelledby="tab-encrypt" style="margin-top:14px;">
+            <!-- Instruksi ringkas -->
+            <div class="muted">
+              Upload foto untuk membuat hasil Edge & Blur, dan file terenkripsi (.enc) dari foto asli.
+            </div>
+
+            <!-- Form enkripsi: backend endpoint /process -->
+            <form id="formEncrypt" method="post" action="/process" enctype="multipart/form-data" style="margin-top: 12px;">
+              <!-- Input file gambar -->
+              <label>Foto (jpg/png)</label>
+
+              <!-- Dropzone: area drag & drop yang membungkus input file -->
+              <div class="dropzone" id="dzImage">
+                <input id="inputImage" type="file" name="image" accept=".jpg,.jpeg,.png" required />
+                <div class="muted" style="margin-top:10px;">
+                  Tip: drag & drop file ke area ini untuk upload lebih cepat.
+                </div>
+
+                <!-- Meta file (nama, ukuran, tipe) akan dirender oleh JS -->
+                <div class="filemeta" id="metaImage" aria-live="polite"></div>
+              </div>
+
+              <!-- Password untuk membentuk key (misal via PBKDF2) dan AES-GCM encrypt -->
+              <label>Password Enkripsi</label>
+              <input type="password" name="password" placeholder="contoh: rahasia123" required />
+
+              <!-- Tombol aksi: submit proses, dan tombol pindah tab -->
+              <div class="actions">
+                <button class="btn primary" type="submit">
+                  <span class="ico" aria-hidden="true">
+                    <!-- Icon plus/shield (SVG) -->
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3l8 4.5v9L12 21 4 16.5v-9L12 3z" stroke="rgba(255,255,255,.95)" stroke-width="1.6"/>
+                      <path d="M8 12h8" stroke="rgba(255,255,255,.95)" stroke-width="1.6" stroke-linecap="round"/>
+                      <path d="M12 8v8" stroke="rgba(255,255,255,.95)" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  Proses
+                </button>
+
+                <!-- Tombol UI untuk pindah ke panel Decrypt tanpa reload -->
+                <button class="btn ghost" type="button" id="btnToDecrypt">
+                  Pindah ke Decrypt
+                </button>
+              </div>
+
+              <!-- Jika backend mengembalikan link download .enc, tampilkan kartu unduhan -->
+              {% if enc_download %}
+                <div class="download-card fade-in">
+                  <div class="chip" aria-hidden="true">
+                    <!-- Icon download (SVG) -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3v10" stroke="rgba(255,255,255,.9)" stroke-width="1.6" stroke-linecap="round"/>
+                      <path d="M8 10l4 4 4-4" stroke="rgba(255,255,255,.9)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M5 19h14" stroke="rgba(255,255,255,.9)" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+
+                  <!-- Info singkat artefak terenkripsi -->
+                  <div class="txt">
+                    <b>Encrypted Artifact Ready</b>
+                    <small>Unduh file terenkripsi (.enc). File ini yang bisa didekripsi kembali.</small>
+                  </div>
+
+                  <!-- Link download dari backend -->
+                  <a class="btn" href="{{ enc_download }}">Download .enc</a>
+                </div>
+              {% endif %}
+            </form>
+          </section>
+
+          <!-- DECRYPT PANEL: upload file .enc + password, submit ke /decrypt -->
+          <section id="panel-decrypt" role="tabpanel" aria-labelledby="tab-decrypt" style="margin-top:14px; display:none;">
+            <!-- Instruksi ringkas -->
+            <div class="muted">
+              Upload file <b>.enc</b> lalu masukkan password yang sama seperti saat enkripsi.
+            </div>
+
+            <!-- Form decrypt: backend endpoint /decrypt -->
+            <form id="formDecrypt" method="post" action="/decrypt" enctype="multipart/form-data" style="margin-top: 12px;">
+              <!-- Input file .enc -->
+              <label>File .enc</label>
+
+              <!-- Dropzone khusus file terenkripsi -->
+              <div class="dropzone" id="dzEnc">
+                <input id="inputEnc" type="file" name="encfile" accept=".enc" required />
+                <div class="muted" style="margin-top:10px;">
+                  Tip: drag & drop file .enc ke area ini.
+                </div>
+
+                <!-- Meta file .enc akan dirender oleh JS -->
+                <div class="filemeta" id="metaEnc" aria-live="polite"></div>
+              </div>
+
+              <!-- Password decrypt (harus sama dengan saat encrypt) -->
+              <label>Password Decrypt</label>
+              <input type="password" name="password_dec" placeholder="password yang sama saat enkripsi" required />
+
+              <!-- Tombol aksi decrypt dan tombol balik ke Encrypt -->
+              <div class="actions">
+                <button class="btn primary" type="submit">
+                  <span class="ico" aria-hidden="true">
+                    <!-- Icon lock (SVG) -->
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M7 11V8a5 5 0 0110 0v3" stroke="rgba(255,255,255,.95)" stroke-width="1.6" stroke-linecap="round"/>
+                      <path d="M6.5 11h11a1.5 1.5 0 011.5 1.5v6A2.5 2.5 0 0116.5 21h-9A2.5 2.5 0 015 18.5v-6A1.5 1.5 0 016.5 11z" stroke="rgba(255,255,255,.95)" stroke-width="1.6"/>
+                    </svg>
+                  </span>
+                  Decrypt
+                </button>
+
+                <!-- Tombol UI untuk kembali ke panel Encrypt -->
+                <button class="btn ghost" type="button" id="btnToEncrypt">
+                  Kembali ke Encrypt
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- Catatan keamanan terkait AES-GCM -->
+          <div class="muted" style="margin-top:14px;">
+            Keamanan: AES-GCM menjaga kerahasiaan dan integritas. Password salah atau file rusak akan gagal decrypt.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: panel output (edge, blur, dan hasil decrypt) -->
+      <div class="card fade-in">
+        <div class="card-h">
+          <h2>Output Monitor</h2>
+
+          <!-- Indikator apakah output sudah ada (berdasarkan variabel dari backend) -->
+          <span class="pill">
+            <span class="dot"></span>
+            {% if edge_url or blur_url or decrypted_url %}
+              Updated
+            {% else %}
+              No output yet
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="card-b">
+          <!-- Grid hasil: kiri edge, kanan blur -->
+          <div class="result-grid">
+            <!-- Box hasil Edge -->
+            <div class="imgbox">
+              <div class="cap">
+                <h3>Hasil Edge (Deteksi Tepi)</h3>
+                <span class="badge">Canny + Face Box</span>
+              </div>
+              <div class="body">
+                {% if edge_url %}
+                  <!-- Gambar edge dari backend -->
+                  <img src="{{ edge_url }}" alt="Edge" class="fade-in" />
+                {% else %}
+                  <!-- Placeholder saat belum ada output -->
+                  <div class="muted">Belum ada hasil. Jalankan Encrypt untuk menampilkan edge.</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Box hasil Blur -->
+            <div class="imgbox">
+              <div class="cap">
+                <h3>Hasil Blur Wajah</h3>
+                <span class="badge">Privacy Mask</span>
+              </div>
+              <div class="body">
+                {% if blur_url %}
+                  <!-- Gambar blur dari backend -->
+                  <img src="{{ blur_url }}" alt="Blur" class="fade-in" />
+                {% else %}
+                  <!-- Placeholder saat belum ada output -->
+                  <div class="muted">Belum ada hasil. Jalankan Encrypt untuk menampilkan blur.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Box hasil Decrypt (foto asli hasil decode dari .enc) -->
+          <div class="imgbox" style="margin-top:16px;">
+            <div class="cap">
+              <h3>Hasil Decrypt (Foto Asli Kembali)</h3>
+              <span class="badge">From .enc</span>
+            </div>
+            <div class="body">
+              {% if decrypted_url %}
+                <!-- Foto hasil decrypt dari backend -->
+                <img src="{{ decrypted_url }}" alt="Decrypted" class="fade-in" />
+              {% else %}
+                <!-- Placeholder saat belum ada hasil decrypt -->
+                <div class="muted">Upload file .enc lalu decrypt untuk menampilkan hasil.</div>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function(){
+      // Ambil elemen overlay (loading screen)
+      const overlay = document.getElementById('overlay');
+
+      // Tab elements
+      const tabEncrypt = document.getElementById('tab-encrypt');
+      const tabDecrypt = document.getElementById('tab-decrypt');
+
+      // Panel elements (konten yang ditampilkan/ disembunyikan)
+      const panelEncrypt = document.getElementById('panel-encrypt');
+      const panelDecrypt = document.getElementById('panel-decrypt');
+
+      // Fungsi untuk set mode tab (encrypt/decrypt)
+      function setTab(mode){
+        const isEncrypt = mode === 'encrypt';
+
+        // Update aria-selected untuk aksesibilitas
+        tabEncrypt.setAttribute('aria-selected', isEncrypt ? 'true' : 'false');
+        tabDecrypt.setAttribute('aria-selected', isEncrypt ? 'false' : 'true');
+
+        // Toggle tampilan panel
+        panelEncrypt.style.display = isEncrypt ? '' : 'none';
+        panelDecrypt.style.display = isEncrypt ? 'none' : '';
+      }
+
+      // Event click tab
+      tabEncrypt.addEventListener('click', () => setTab('encrypt'));
+      tabDecrypt.addEventListener('click', () => setTab('decrypt'));
+
+      // Tombol "pindah tab" di masing-masing panel (opsional chaining dengan ?.)
+      document.getElementById('btnToDecrypt')?.addEventListener('click', () => setTab('decrypt'));
+      document.getElementById('btnToEncrypt')?.addEventListener('click', () => setTab('encrypt'));
+
+      // Helper drag & drop: mengaktifkan dropzone, render meta file, dan assign ke input
+      function setupDropzone(dzId, inputId, metaId){
+        const dz = document.getElementById(dzId);
+        const input = document.getElementById(inputId);
+        const meta = document.getElementById(metaId);
+
+        // Format ukuran file agar mudah dibaca
+        function fmtBytes(bytes){
+          if (!bytes && bytes !== 0) return '-';
+          const units = ['B','KB','MB','GB'];
+          let i = 0, n = bytes;
+          while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+          return (Math.round(n * 10) / 10) + ' ' + units[i];
+        }
+
+        // Render informasi file terpilih: nama, ukuran, tipe
+        function renderMeta(file){
+          meta.innerHTML = '';
+          if (!file) return;
+
+          const name = document.createElement('span');
+          name.className = 'meta';
+          name.textContent = 'Nama: ' + file.name;
+
+          const size = document.createElement('span');
+          size.className = 'meta';
+          size.textContent = 'Ukuran: ' + fmtBytes(file.size);
+
+          const type = document.createElement('span');
+          type.className = 'meta';
+          type.textContent = 'Tipe: ' + (file.type || 'unknown');
+
+          meta.appendChild(name);
+          meta.appendChild(size);
+          meta.appendChild(type);
+        }
+
+        // Saat file dipilih lewat file picker
+        input.addEventListener('change', () => {
+          const file = input.files && input.files[0] ? input.files[0] : null;
+          renderMeta(file);
+        });
+
+        // Saat drag masuk/di atas dropzone: aktifkan highlight
+        ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, (e) => {
+          e.preventDefault(); e.stopPropagation();
+          dz.classList.add('dragover');
+        }));
+
+        // Saat drag keluar / drop selesai: matikan highlight
+        ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, (e) => {
+          e.preventDefault(); e.stopPropagation();
+          dz.classList.remove('dragover');
+        }));
+
+        // Saat file di-drop: assign ke input dan tampilkan meta
+        dz.addEventListener('drop', (e) => {
+          const files = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : null;
+          if (!files || !files.length) return;
+
+          // Assign FileList ke input (browser modern biasanya mengizinkan ini)
+          input.files = files;
+
+          // Render metadata file pertama
+          renderMeta(files[0]);
+        });
+      }
+
+      // Inisialisasi dropzone untuk image dan encfile
+      setupDropzone('dzImage','inputImage','metaImage');
+      setupDropzone('dzEnc','inputEnc','metaEnc');
+
+      // Tampilkan overlay saat form disubmit (memberi feedback "processing")
+      function showOverlay(){ overlay.classList.add('on'); }
+      document.getElementById('formEncrypt')?.addEventListener('submit', showOverlay);
+      document.getElementById('formDecrypt')?.addEventListener('submit', showOverlay);
+
+      // Jika ada hasil decrypt dari backend, otomatis pindah ke tab decrypt
+      // Jinja akan merender boolean ini sebagai true/false literal
+      const hasDecrypted = {{ 'true' if decrypted_url else 'false' }};
+      if (hasDecrypted) setTab('decrypt');
+    })();
+  </script>
+</body>
+</html>
