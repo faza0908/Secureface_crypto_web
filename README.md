@@ -61,8 +61,8 @@ Sistem ini mengintegrasikan empat komponen teknologi utama:
 
 | Halaman Encrypt | Halaman Decrypt |
 |:---:|:---:|
-| ![Encrypt UI](<img width="1452" height="890" alt="image" src="https://github.com/user-attachments/assets/ed9d67b0-edd1-49c0-b656-5fc99fc9304f" />
-) | ![Decrypt UI](<img width="959" height="866" alt="image" src="https://github.com/user-attachments/assets/32521ffb-c8d7-4851-ad34-8f137bdf7653" />
-) |
+| <img width="1452" height="890" alt="image" src="https://github.com/user-attachments/assets/ed9d67b0-edd1-49c0-b656-5fc99fc9304f" />  |<img width="959" height="866" alt="image" src="https://github.com/user-attachments/assets/32521ffb-c8d7-4851-ad34-8f137bdf7653" />  |
+
+
 
 ---
